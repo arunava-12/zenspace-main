@@ -1,0 +1,32 @@
+@startuml
+title Sprint 1 - Component Diagram (Prisma + API)
+
+package "Frontend (React)" {
+  [Pages]
+  [Components]
+  [State Store]
+}
+
+package "Backend (Express + Prisma)" {
+  [Auth Routes]
+  [Workspace Routes]
+  [Project Routes]
+  [Task Routes]
+  [Prisma Client]
+}
+
+database "PostgreSQL"
+
+[Pages] --> [State Store]
+[State Store] --> [Workspace Routes]
+[State Store] --> [Project Routes]
+[State Store] --> [Task Routes]
+
+[Workspace Routes] --> [Prisma Client]
+[Project Routes] --> [Prisma Client]
+[Task Routes] --> [Prisma Client]
+[Auth Routes] --> [Prisma Client]
+
+[Prisma Client] --> PostgreSQL
+
+@enduml

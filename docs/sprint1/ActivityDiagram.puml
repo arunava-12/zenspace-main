@@ -1,0 +1,21 @@
+@startuml
+title Sprint 1 - Activity (DB Aligned Flow)
+
+start
+
+:Authenticate User;
+
+:Create Workspace (DB insert);
+:Select Workspace;
+
+:Create Project (linked to workspace);
+
+:Create Task;
+:Assign User (assigneeId);
+:Set Due Date;
+:Save Task in DB;
+
+:Update Task Status;
+
+stop
+@enduml

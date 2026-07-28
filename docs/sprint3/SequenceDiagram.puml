@@ -1,0 +1,51 @@
+@startuml
+title Final - Sequence (Task + Collaboration + Analytics)
+
+actor Admin
+actor User
+participant UI
+participant API
+participant Prisma
+participant NotificationService
+participant AnalyticsService
+participant FileService
+database DB
+
+' ===== INVITE FLOW =====
+Admin -> UI : Invite User
+UI -> API : POST /invite
+
+API -> Prisma : create WorkspaceUser (pending)
+Prisma -> DB : INSERT
+
+User -> UI : Accept Invite
+UI -> API : JOIN
+
+API -> Prisma : update member role
+Prisma -> DB : UPDATE
+
+' ===== TASK UPDATE =====
+User -> UI : Update Task Status
+UI -> API : PUT /task/status
+
+API -> Prisma : update task
+Prisma -> DB : UPDATE
+
+API -> NotificationService : notify team
+API -> AnalyticsService : log activity
+
+' ===== FILE UPLOAD =====
+User -> UI : Upload File
+UI -> API : POST /file
+
+API -> FileService : store file
+FileService -> DB : save metadata
+
+' ===== ANALYTICS =====
+User -> UI : View Analytics
+UI -> API : GET /analytics
+
+API -> AnalyticsService : fetch insights
+AnalyticsService --> UI : analytics data
+
+@enduml

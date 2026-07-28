@@ -1,0 +1,53 @@
+@startuml
+title Final - Component (Full Architecture)
+
+package "Frontend" {
+  [Dashboard UI]
+  [Team Page]
+  [Task Board]
+  [Notification UI]
+  [Analytics UI]
+}
+
+package "Backend" {
+  [User Routes]
+  [Workspace Routes]
+  [Project Routes]
+  [Task Routes]
+
+  [Invite Logic]
+  [Collaboration Engine]
+
+  [Notification Service]
+  [Analytics Service]
+  [File Service]
+
+  [Prisma Client]
+}
+
+database DB
+cloud "File Storage"
+
+' ===== FRONTEND TO BACKEND =====
+[Dashboard UI] --> [Task Routes]
+[Team Page] --> [User Routes]
+[Team Page] --> [Workspace Routes]
+[Task Board] --> [Project Routes]
+
+[Notification UI] --> [Notification Service]
+[Analytics UI] --> [Analytics Service]
+
+' ===== BACKEND FLOW =====
+[User Routes] --> [Prisma Client]
+[Workspace Routes] --> [Prisma Client]
+[Project Routes] --> [Prisma Client]
+[Task Routes] --> [Prisma Client]
+
+[Notification Service] --> [Prisma Client]
+[Analytics Service] --> [Prisma Client]
+
+[File Service] --> "File Storage"
+
+[Prisma Client] --> DB
+
+@enduml

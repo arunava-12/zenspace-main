@@ -1,0 +1,19 @@
+@startuml
+title Sprint 2 - Use Case (Collaboration)
+
+actor User
+
+rectangle "Collaboration Module" {
+
+  User --> (Invite User to Workspace)
+  User --> (Join via Invite Link)
+
+  User --> (Add User to Project)
+  User --> (Assign Role)
+
+  User --> (Manage Members)
+  User --> (Receive Notification)
+
+}
+
+@enduml

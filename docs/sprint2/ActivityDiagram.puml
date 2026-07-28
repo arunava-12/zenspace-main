@@ -1,0 +1,20 @@
+@startuml
+title Sprint 2 - Activity (Collaboration Flow)
+
+start
+
+:Send Invite;
+:Store Invite in DB;
+
+:User Accepts Invite;
+:Add to WorkspaceUser;
+
+:Assign Role (ADMIN/MEMBER);
+
+:User Collaborates on Tasks;
+
+:Trigger Notification;
+:Store Notification;
+
+stop
+@enduml

@@ -1,0 +1,20 @@
+@startuml
+title Sprint 1 - Sequence (Create Task - Prisma Flow)
+
+actor User
+participant UI
+participant "Express API"
+participant "Prisma Client"
+database DB
+
+User -> UI : Fill Task Form
+UI -> "Express API" : POST /tasks
+
+"Express API" -> "Prisma Client" : create(Task)
+"Prisma Client" -> DB : INSERT Task
+
+DB --> "Prisma Client" : success
+"Prisma Client" --> "Express API" : Task object
+"Express API" --> UI : Response
+
+@enduml

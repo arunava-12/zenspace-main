@@ -1,0 +1,27 @@
+@startuml
+title Sprint 2 - Sequence (Invite + Join)
+
+actor Admin
+actor User
+participant UI
+participant API
+participant Prisma
+database DB
+
+Admin -> UI : Invite User
+UI -> API : POST /invite
+
+API -> Prisma : create WorkspaceUser (pending)
+Prisma -> DB : INSERT
+
+User -> UI : Accept Invite
+UI -> API : JOIN
+
+API -> Prisma : update role/member
+Prisma -> DB : UPDATE
+
+DB --> Prisma
+Prisma --> API
+API --> UI
+
+@enduml

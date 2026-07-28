@@ -1,0 +1,66 @@
+import React, { useState } from "react";
+import Sidebar from "./Sidebar.tsx";
+import Navbar from "./Navbar.tsx";
+import ActivitySidebar from "./ActivitySidebar.tsx";
+import GlobalModals from "./GlobalModals.tsx";
+import { Outlet } from "react-router-dom";
+
+interface LayoutProps {
+  store: any;
+}
+
+const Layout: React.FC<LayoutProps> = ({ store }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activityOpen, setActivityOpen] = useState(false);
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300 relative">
+      {/* Global Modals */}
+      <GlobalModals store={store} />
+
+
+      {/* Navigation Sidebar (Left) */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+        activeWorkspace={store.activeWorkspace}
+        workspaces={store.workspaces}
+        setActiveWorkspaceId={store.setActiveWorkspaceId}
+        createWorkspace={store.createWorkspace}
+        openWorkspaceModal={store.openWorkspaceModal}
+        deleteWorkspace={store.deleteWorkspace}
+      />
+
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
+        {/* Navbar */}
+        <Navbar
+          store={store}
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          toggleActivity={() => setActivityOpen(!activityOpen)}
+          isSidebarOpen={sidebarOpen}
+          isActivityOpen={activityOpen}
+        />
+
+        <div className="flex-1 flex overflow-hidden">
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+            <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-700">
+              <Outlet />
+            </div>
+          </main>
+
+          {/* Activity Sidebar (Right) */}
+          <ActivitySidebar
+            isOpen={activityOpen}
+            setIsOpen={setActivityOpen}
+            tasks={store.tasks}
+            users={store.users}
+            projects={store.projects}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Layout;

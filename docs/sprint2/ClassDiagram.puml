@@ -1,0 +1,46 @@
+@startuml
+title Sprint 2 - Class Diagram (Relations + Roles)
+
+' ===== CORE =====
+class User
+class Workspace
+class Project
+class Task
+
+' ===== RELATION TABLES (IMPORTANT) =====
+class WorkspaceUser {
+  userId: String
+  workspaceId: String
+  role: Role
+}
+
+class ProjectUser {
+  userId: String
+  projectId: String
+  role: Role
+}
+
+class Notification {
+  id: String
+  userId: String
+  message: String
+  isRead: Boolean
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+' ===== RELATIONS =====
+User "1" -- "many" WorkspaceUser
+Workspace "1" -- "many" WorkspaceUser
+
+User "1" -- "many" ProjectUser
+Project "1" -- "many" ProjectUser
+
+Project "1" -- "many" Task
+User "1" -- "many" Notification
+
+@enduml

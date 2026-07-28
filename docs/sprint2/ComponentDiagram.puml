@@ -1,0 +1,33 @@
+@startuml
+title Sprint 2 - Component (Realtime + Collaboration)
+
+package "Frontend" {
+  [Team Page]
+  [Notification UI]
+}
+
+package "Backend" {
+  [User Routes]
+  [Workspace Routes]
+  [Project Routes]
+  [Invite Logic]
+  [Notification Service]
+  [Prisma Client]
+}
+
+database DB
+
+[Team Page] --> [User Routes]
+[Team Page] --> [Workspace Routes]
+[Team Page] --> [Project Routes]
+
+[Notification UI] --> [Notification Service]
+
+[User Routes] --> [Prisma Client]
+[Workspace Routes] --> [Prisma Client]
+[Project Routes] --> [Prisma Client]
+[Notification Service] --> [Prisma Client]
+
+[Prisma Client] --> DB
+
+@enduml

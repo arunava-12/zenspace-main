@@ -1,0 +1,29 @@
+@startuml
+title Final - Use Case (Full System)
+
+actor User
+actor Admin
+
+rectangle "Project Management System" {
+
+  ' ===== CORE =====
+  User --> (Create Workspace)
+  User --> (Create Project)
+  User --> (Create Task)
+  User --> (Update Task Status)
+
+  ' ===== COLLABORATION =====
+  Admin --> (Invite User)
+  User --> (Join Workspace)
+  Admin --> (Assign Role)
+  User --> (Collaborate on Tasks)
+
+  ' ===== FEATURES =====
+  User --> (Receive Notifications)
+  User --> (Upload Files)
+  User --> (View Analytics)
+  User --> (View Activity Logs)
+
+}
+
+@enduml

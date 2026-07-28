@@ -1,0 +1,35 @@
+@startuml
+title Final - Activity (Core + Collaboration + Insights)
+
+start
+
+:Create Workspace;
+:Invite Team Members;
+:Assign Roles;
+
+:Create Project;
+
+:Create Task;
+:Assign Task;
+:Set Due Date;
+
+fork
+  :Update Task Status;
+fork again
+  :Collaborate in Real-time;
+fork again
+  :Trigger Notification;
+  :Store Notification;
+fork again
+  :Upload File;
+  :Store File;
+fork again
+  :Track User Activity;
+  :Store Activity Log;
+fork again
+  :Generate Analytics;
+  :View Analytics Dashboard;
+end fork
+
+stop
+@enduml

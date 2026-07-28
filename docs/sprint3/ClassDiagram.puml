@@ -1,0 +1,66 @@
+@startuml
+title Final - Class Diagram (Full System)
+
+' ===== CORE =====
+class User
+class Workspace
+class Project
+class Task
+
+' ===== RELATION TABLES =====
+class WorkspaceUser {
+  userId: String
+  workspaceId: String
+  role: Role
+}
+
+class ProjectUser {
+  userId: String
+  projectId: String
+  role: Role
+}
+
+' ===== FEATURES =====
+class Notification {
+  id: String
+  userId: String
+  message: String
+  isRead: Boolean
+}
+
+class File {
+  id: String
+  taskId: String
+  fileUrl: String
+  fileType: String
+}
+
+class ActivityLog {
+  id: String
+  userId: String
+  action: String
+  timestamp: DateTime
+}
+
+' ===== ENUM =====
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+' ===== RELATIONS =====
+User "1" -- "many" WorkspaceUser
+Workspace "1" -- "many" WorkspaceUser
+
+User "1" -- "many" ProjectUser
+Project "1" -- "many" ProjectUser
+
+Project "1" -- "many" Task
+
+Task "1" -- "many" File
+
+User "1" -- "many" Notification
+User "1" -- "many" ActivityLog
+
+@enduml

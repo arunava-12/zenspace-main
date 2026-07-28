@@ -1,0 +1,21 @@
+@startuml
+title Sprint 1 - Use Case (Prisma Flow)
+
+actor User
+
+rectangle "ZenSpace Core System" {
+
+  User --> (Create Workspace)
+  User --> (Switch Workspace)
+
+  User --> (Create Project)
+  User --> (Update Project)
+
+  User --> (Create Task)
+  User --> (Assign Task to User)
+  User --> (Set Due Date)
+  User --> (Change Task Status)
+
+}
+
+@enduml

@@ -1,0 +1,14 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "4173:80"
+    depends_on:
+      - backend
+
+  backend:
+    build: ./server
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./server/.env
