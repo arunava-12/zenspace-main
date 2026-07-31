@@ -10,8 +10,10 @@ class APIError extends Error {
   }
 }
 
-export const API_BASE = import.meta.env.VITE_API_URL || "https://zenspace-backend-hsfl.onrender.com/api";
-
+export const API_BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : "https://zenspace-backend-hsfl.onrender.com/api";
+  
 const FALLBACK_USER = {
   id: "fallback-user",
   name: "Arunava",
