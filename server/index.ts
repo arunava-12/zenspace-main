@@ -22,10 +22,15 @@ process.on("unhandledRejection", (err) => {
 const app = express();
 
 // 🔥 VERY IMPORTANT (add this line)
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [
+      process.env.FRONTEND_URL!,
+      "http://localhost:5173", // For local development
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // 🔍 LOG ALL REQUESTS
