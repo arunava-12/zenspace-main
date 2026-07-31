@@ -1,0 +1,43 @@
+name: ZenSpace CI
+
+on:
+  push:
+    branches:
+      - docker
+  pull_request:
+    branches:
+      - docker
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Build Frontend
+        env:
+          VITE_API_URL: http://localhost:4000
+        run: npm run build
+
+      - name: Install Backend Dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Generate Prisma Client
+        working-directory: ./server
+        run: npx prisma generate
+
+      - name: Build Backend
+        working-directory: ./server
+        run: npm run build
