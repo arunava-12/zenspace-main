@@ -230,51 +230,79 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ store }) => {
   }, [project, projectTasks, projectFiles, users]);
 
   const handleAISuggestTasks = async () => {
+    if (!project?.id || !project?.leadId) {
+      alert("This project is missing its project lead. Please refresh and try again.");
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/ai/suggest-tasks`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: project.name,
-            description: project.description,
-          }),
-        },
-      );
+      // API_BASE already includes the configured /api prefix used by the rest
+      // of the application and matches the backend mount in server/index.ts.
+      const apiBase = `${import.meta.env.VITE_API_URL?.replace(/\\/$/, "")}/api`;
+      const response = await fetch(`${apiBase}/ai/suggest-tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: project.name,
+          description: project.description || "",
+        }),
+      });
 
-      if (!response.ok) {
-        throw new Error("AI request failed");
+      const responseText = await response.text();
+      let payload: any;
+      try {
+        payload = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        throw new Error(
+          `AI endpoint returned a non-JSON response (HTTP ${response.status}). Check the deployed backend route.`,
+        );
       }
 
-      const suggestedTasks = await response.json();
+      if (!response.ok) {
+        throw new Error(payload?.error || payload?.message || `AI request failed (HTTP ${response.status})`);
+      }
 
-      suggestedTasks.forEach((st: any) => {
-        const newTask = {
-          id: `t-ai-${Math.random().toString(36).substr(2, 9)}`,
+      const suggestedTasks = Array.isArray(payload) ? payload : payload?.tasks;
+      if (!Array.isArray(suggestedTasks) || suggestedTasks.length === 0) {
+        throw new Error("The AI did not return any valid task suggestions.");
+      }
+
+      const validTypes = new Set(["TASK", "BUG", "FEATURE", "IMPROVEMENT"]);
+      const createdTasks = [];
+
+      // Persist sequentially so every task has a server-generated database ID.
+      for (const suggestion of suggestedTasks) {
+        if (!suggestion?.title || typeof suggestion.title !== "string") continue;
+
+        const rawType = String(suggestion.type || "TASK").toUpperCase();
+        const rawPriority = String(suggestion.priority || "Medium").toLowerCase();
+        const taskType = validTypes.has(rawType) ? rawType : "TASK";
+        const priority =
+          rawPriority === "high" ? "High" :
+          rawPriority === "low" ? "Low" : "Medium";
+
+        const createdTask = await addTask({
           projectId: project.id,
-          title: st.title,
-          description: st.description,
-          status: "Todo" as const,
-          type: st.type as any,
-          priority:
-            st.priority === "High"
-              ? "HIGH"
-              : st.priority === "Medium"
-                ? "MEDIUM"
-                : "LOW",
+          title: suggestion.title.trim(),
+          description: typeof suggestion.description === "string" ? suggestion.description : "",
+          status: "Todo",
+          type: taskType,
+          priority,
           assigneeId: project.leadId,
-          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
-          createdAt: new Date().toISOString(),
-        };
-        addTask(newTask);
-      });
+          dueDate: "",
+        });
+        createdTasks.push(createdTask);
+      }
+
+      if (createdTasks.length === 0) {
+        throw new Error("The AI response did not contain any usable task titles.");
+      }
+
+      alert(`Successfully created ${createdTasks.length} AI-generated task(s).`);
     } catch (error) {
-      console.error("AI Error:", error);
-      alert("Failed to generate AI tasks. Please try again.");
+      console.error("AI task generation failed:", error);
+      alert(error instanceof Error ? error.message : "Failed to generate AI tasks. Please try again.");
     } finally {
       setIsGenerating(false);
     }
