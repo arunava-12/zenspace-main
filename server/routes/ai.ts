@@ -4,7 +4,7 @@ import Groq from "groq-sdk";
 const router = express.Router();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "openai/gpt-oss-120b";
 
 // ---------------------------------------------------------------------------
 // Robust JSON extraction: handles fences, leading prose, trailing prose,
