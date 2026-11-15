@@ -71,19 +71,22 @@ router.post("/chat", async (req, res) => {
 // ---------------------------------------------------------------------------
 router.post("/suggest-tasks", async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description } = req.body ?? {};
 
-    // Input validation — prevents a crash if the frontend sends an empty body
-    if (!name || !description) {
-      return res
-        .status(400)
-        .json({ error: "name and description are required" });
+    // A project description is optional in the database; the project name is
+    // sufficient context for generating useful starter tasks.
+    if (typeof name !== "string" || !name.trim()) {
+      return res.status(400).json({ error: "name is required" });
+    }
+
+    if (description !== undefined && typeof description !== "string") {
+      return res.status(400).json({ error: "description must be a string" });
     }
 
     const completion = await groq.chat.completions.create({
       model: MODEL,
       // max_tokens keeps the response tight and prevents mid-array truncation
-      max_tokens: 600,
+      max_tokens: 1000,
       messages: [
         {
           role: "system",
@@ -94,8 +97,8 @@ router.post("/suggest-tasks", async (req, res) => {
         {
           role: "user",
           content:
-            `Generate exactly 3 specific actionable tasks for a project named "${name}" ` +
-            `with description "${description}". ` +
+            `Generate exactly 3 specific actionable tasks for a project named "${name.trim()}" ` +
+            `with description "${(description || "No project description provided").trim()}". ` +
             `Return ONLY a JSON array of 3 objects. ` +
             `Each object must have exactly these keys: ` +
             `"title" (string), "description" (string), "priority" ("low"|"medium"|"high"), "type" (string). ` +
@@ -108,7 +111,29 @@ router.post("/suggest-tasks", async (req, res) => {
     console.log("AI /suggest-tasks raw response:", raw); // keep for debugging
 
     const parsed = extractJSON(raw);
-    res.json(parsed);
+    if (!Array.isArray(parsed)) {
+      throw new Error("AI response must be a JSON array");
+    }
+
+    const normalized = parsed
+      .filter((task: any) => task && typeof task.title === "string" && task.title.trim())
+      .slice(0, 3)
+      .map((task: any) => {
+        const priority = String(task.priority || "Medium").toLowerCase();
+        const type = String(task.type || "TASK").toUpperCase();
+        return {
+          title: task.title.trim(),
+          description: typeof task.description === "string" ? task.description : "",
+          priority: priority === "high" ? "High" : priority === "low" ? "Low" : "Medium",
+          type: ["TASK", "BUG", "FEATURE", "IMPROVEMENT"].includes(type) ? type : "TASK",
+        };
+      });
+
+    if (normalized.length === 0) {
+      return res.status(502).json({ error: "AI returned no usable task suggestions" });
+    }
+
+    res.json(normalized);
   } catch (err) {
     console.error("AI /suggest-tasks error:", err);
     res.status(500).json({ error: "AI request failed" });
