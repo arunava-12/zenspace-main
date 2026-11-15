@@ -240,10 +240,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ store }) => {
       // API_BASE already includes the configured /api prefix used by the rest
       // of the application and matches the backend mount in server/index.ts.
       const configuredApiUrl = import.meta.env.VITE_API_URL || "";
-      const normalizedApiUrl = configuredApiUrl.endsWith("/")
-        ? configuredApiUrl.slice(0, -1)
-        : configuredApiUrl;
-      const apiBase = `${normalizedApiUrl}/api`;
+      const apiBase = `${configuredApiUrl.replace(/\/+$/, "")}/api`;
       const response = await fetch(`${apiBase}/ai/suggest-tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
