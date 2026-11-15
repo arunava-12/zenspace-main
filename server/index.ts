@@ -21,7 +21,6 @@ process.on("unhandledRejection", (err) => {
 
 const app = express();
 
-// 🔥 VERY IMPORTANT (add this line)
 app.use(
   cors({
     origin: [
@@ -33,47 +32,55 @@ app.use(
 );
 app.use(express.json());
 
-// 🔍 LOG ALL REQUESTS
+// Log all requests (including legacy route requests)
 app.use((req, _res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
-// Routes
+// Canonical API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/workspaces", workspaceRoutes);
-app.use("/api/tasks", taskRoutes); // 🔥 ADD THIS
+app.use("/api/tasks", taskRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/files", fileRoutes);
+
+// Backward-compatible alias: the deployed invite UI currently calls
+// /projects/:projectId/invites without the /api prefix.
+// Keep this alias so existing invite links work while the frontend is updated.
+app.use("/projects", projectRoutes);
 
 // Health / Root Route
 app.get("/", (_req, res) => {
   res.status(200).send("ZenSpace API Running");
 });
 
-// ✅ ADD THIS (CRITICAL)
 app.head("/", (_req, res) => {
   res.status(200).end();
 });
 
+// JSON 404 response instead of Express HTML so clients can safely inspect errors.
+app.use((_req, res) => {
+  res.status(404).json({ error: "API route not found" });
+});
+
 // Global Error Handler
-app.use((err: any, req: any, res: any, next: any) => {
+app.use((err: any, _req: any, res: any, _next: any) => {
   console.error("❌ SERVER ERROR:", err);
 
-  // Prisma specific connection errors
-  if (err.code === 'P1001' || err.message?.includes("Can't reach database server")) {
+  if (err.code === "P1001" || err.message?.includes("Can't reach database server")) {
     return res.status(503).json({
       error: "Database connection failed. The server might be waking up, please try again in 5-10 seconds.",
-      code: "DB_CONNECTION_ERROR"
+      code: "DB_CONNECTION_ERROR",
     });
   }
 
   res.status(500).json({
     error: "Internal Server Error",
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    message: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });
 
